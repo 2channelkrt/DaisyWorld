@@ -18,13 +18,10 @@
     <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="daisy.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="patch.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="basicDaisy.cpp">
+    <ClCompile Include="Daisy.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

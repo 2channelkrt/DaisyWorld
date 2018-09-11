@@ -1,4 +1,4 @@
-#include "daisy.cpp"
+#include "Daisy.cpp"
 
 class patch
 {
@@ -11,12 +11,13 @@ public :
 		this->exist = exist;
 		this->temperature = temperature;
 	}
-	bool allocDaisy(daisy* daisy)
+	bool allocDaisy(string color)
 	{
-		if (this->exist == false) return false;
+		if (this->exist == true) return false;
 		else
 		{
-			this->daisy = daisy;
+			this->daisy = &Daisy(color);
+			this->exist = true;
 			return true;
 		}
 	}
@@ -33,12 +34,23 @@ public :
 		this->updateColor();
 		
 	}
-	bool exist() { return exist; }
+	bool GetExist() { return this->exist; }
+	void draw()
+	{
+		if (this->exist == false) return;
+		glBegin(GL_QUADS);
+		this->daisy->SetDrawColor();
+		dot(this->windowX - (CELL_SIZE / 2), this->windowY - (CELL_SIZE / 2));
+		dot(this->windowX - (CELL_SIZE / 2), this->windowY + (CELL_SIZE / 2));
+		dot(this->windowX + (CELL_SIZE / 2), this->windowY + (CELL_SIZE / 2));
+		dot(this->windowX + (CELL_SIZE / 2), this->windowY - (CELL_SIZE / 2));
+		glEnd();
+	}
 
 private:
 	int windowX, windowY;
 	bool exist;
-	daisy* daisy;
+	Daisy* daisy;
 	float temperature;
 
 	void updateColor()
@@ -47,6 +59,6 @@ private:
 	}
 	void updateTemperature()
 	{
-		int diffuseTemp=this->daisy->getDiffuseTemp();
+		float diffuseTemp=this->daisy->GetDiffuseTemp();
 	}
 };

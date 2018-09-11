@@ -115,8 +115,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="basicDaisy.cpp" />
-    <ClCompile Include="daisy.cpp" />
+    <ClCompile Include="Daisy.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="patch.cpp" />
   </ItemGroup>
