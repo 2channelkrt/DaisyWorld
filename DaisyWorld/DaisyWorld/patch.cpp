@@ -1,25 +1,14 @@
 #include "Daisy.cpp"
-
+#include <stdlib.h>
 class patch
 {
 public :
-	patch(int windowX, int windowY,bool exist, float temperature)
+	patch(int windowX, int windowY, float temperature)
 	{
 		this->windowX = windowX;
 		this->windowY = windowY;
-
-		this->exist = exist;
+		this->daisy = Daisy();
 		this->temperature = temperature;
-	}
-	bool allocDaisy(string color)
-	{
-		if (this->exist == true) return false;
-		else
-		{
-			this->daisy = &Daisy(color);
-			this->exist = true;
-			return true;
-		}
 	}
 
 	void setTemp(float temperature)
@@ -34,23 +23,37 @@ public :
 		this->updateColor();
 		
 	}
-	bool GetExist() { return this->exist; }
 	void draw()
 	{
-		if (this->exist == false) return;
-		glBegin(GL_QUADS);
-		this->daisy->SetDrawColor();
-		dot(this->windowX - (CELL_SIZE / 2), this->windowY - (CELL_SIZE / 2));
-		dot(this->windowX - (CELL_SIZE / 2), this->windowY + (CELL_SIZE / 2));
-		dot(this->windowX + (CELL_SIZE / 2), this->windowY + (CELL_SIZE / 2));
-		dot(this->windowX + (CELL_SIZE / 2), this->windowY - (CELL_SIZE / 2));
-		glEnd();
+		if (this->daisy.GetAlive() == true)
+		{
+			glBegin(GL_QUADS);
+			this->daisy.GetDrawColor();
+			dot((this->windowX - (CELL_SIZE / 2)), (this->windowY - (CELL_SIZE / 2)));
+			dot((this->windowX - (CELL_SIZE / 2)), (this->windowY + (CELL_SIZE / 2)));
+			dot((this->windowX + (CELL_SIZE / 2)), (this->windowY + (CELL_SIZE / 2)));
+			dot((this->windowX + (CELL_SIZE / 2)), (this->windowY - (CELL_SIZE / 2)));
+			glEnd();
+		}
+		else
+		{
+			glBegin(GL_QUADS);
+			glColor3f(0.5, 0.5, 0.5);
+			dot((this->windowX - (CELL_SIZE / 2)), (this->windowY - (CELL_SIZE / 2)));
+			dot((this->windowX - (CELL_SIZE / 2)), (this->windowY + (CELL_SIZE / 2)));
+			dot((this->windowX + (CELL_SIZE / 2)), (this->windowY + (CELL_SIZE / 2)));
+			dot((this->windowX + (CELL_SIZE / 2)), (this->windowY - (CELL_SIZE / 2)));
+			glEnd();
+		}
 	}
-
+	bool isAlive() { return this->daisy.GetAlive(); }
+	void AllocDaisy(int color)
+	{
+		this->daisy.SetDaisy(color);
+	}
 private:
 	int windowX, windowY;
-	bool exist;
-	Daisy* daisy;
+	Daisy daisy;
 	float temperature;
 
 	void updateColor()
@@ -59,6 +62,6 @@ private:
 	}
 	void updateTemperature()
 	{
-		float diffuseTemp=this->daisy->GetDiffuseTemp();
+		float diffuseTemp = this->daisy.GetDiffuseTemp();
 	}
 };
