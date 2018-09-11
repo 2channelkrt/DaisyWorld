@@ -24,6 +24,9 @@
     <ClCompile Include="patch.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="basicDaisy.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base.h">

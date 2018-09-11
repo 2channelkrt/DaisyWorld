@@ -1,15 +1,28 @@
+#include "base.h"
+#include "basicDaisy.cpp"
 
-#include <string>
-using namespace std;
-
-class daisy
+class daisy : basicDaisy
 {
 public:
+	daisy(string color) : basicDaisy(color)
+	{
+		this->color = color;
+		this->age = 0;
+	}
 
+	void update() //need to be called after current patch update
+	{
+		//todo
+	}
 
+	float getDiffuseTemp()
+	{
+		//return temp;
+	}
 
 private:
-	string color;
-	float albedo; //reflective rate 0~1
+	//does each daisy has to retain its place info?
 	int age;
+
+	
 };
