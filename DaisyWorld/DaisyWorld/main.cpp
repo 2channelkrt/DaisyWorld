@@ -1,22 +1,30 @@
-
-#include "base.h"
 #include "patch.cpp"
-#include <stdio.h>
 #include <time.h>
-
+#include <array>
+#include <algorithm>
+#include <random>
 patch** world;
+colorSystem cs;
+
+std::array<int, CELL_X_NUM*CELL_Y_NUM> arr;
+
+void initDaisyGen()
+{
+	for (int x = 0; x < CELL_X_NUM*CELL_Y_NUM; x++) arr[x] = x;
+	shuffle(arr.begin(), arr.end(), std::default_random_engine(rand()));
+}
 
 void randomPlace(float percentage, int color)
 {
-	srand(time(NULL));
+	static int index = 0;
 	int x, y;
-	for(int i=0;i<CELL_X_NUM*CELL_Y_NUM*percentage;i++)
+	for (int i = index; i < index + CELL_X_NUM*CELL_Y_NUM * percentage; i++)
 	{
-		x = rand() % CELL_X_NUM;
-		y = rand() % CELL_Y_NUM;
-		if (world[x][y].isAlive() == true) i--;
-		else world[x][y].AllocDaisy(color);
+		x = arr[i] / CELL_X_NUM;
+		y = arr[i] % CELL_X_NUM;
+		world[x][y].AllocDaisy(color);
 	}
+	index = CELL_X_NUM * CELL_Y_NUM * percentage;
 
 }
 
@@ -33,16 +41,12 @@ void init()
 		}
 	}
 
+	initDaisyGen();
+
 	randomPlace(INIT_WHITE_DAISY_PERCENTAGE, 1);
 	randomPlace(INIT_BLACK_DAISY_PERCENTAGE, 0);
 
-	/*for (int x = 0; x < CELL_X_NUM; x++)
-	{
-		for (int y = 0; y < CELL_Y_NUM; y++)
-		{
-
-		}
-	}*/
+	cs_init(&cs);
 }
 
 void DrawBorder()
@@ -71,7 +75,8 @@ void DrawPatch()
 	{
 		for (int y = 0; y < CELL_Y_NUM; y++)
 		{
-			world[x][y].draw();
+			world[x][y].drawDaisy();
+			//world[x][y].drawPatch();
 			
 		}
 	}
@@ -95,13 +100,15 @@ int main(int argc, char *argv[])
 	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 	glutCreateWindow("Daisy World");
 
+	srand(time(NULL));
+
 	init();
 
 	glutDisplayFunc(display);
 	glutMainLoop();
 
 	/*for (int x = 0; x < CELL_X_NUM; x++)
-		free(world[x]);
+		
 	free(world);*/
 	
 	return 0;

@@ -1,6 +1,7 @@
 #include <freeglut.h>
-#include "base.h"
 #include <stdio.h>
+#include "color.h"
+#include "base.cpp"
 class Daisy
 {
 public:

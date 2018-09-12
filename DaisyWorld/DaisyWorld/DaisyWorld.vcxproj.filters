@@ -24,9 +24,15 @@
     <ClCompile Include="Daisy.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="base.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="color.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="base.h">
+    <ClInclude Include="color.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
