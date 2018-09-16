@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include "color.h"
 #include "base.cpp"
+
+
 class Daisy
 {
 public:
@@ -14,9 +16,6 @@ public:
 		this->color = color;
 		this->age = 0;
 		this->alive = true;
-		if (this->color == 1) this->albedo = WHITE_DAISY_ALBEDO;
-		else if(this->color == 0) this->albedo = BLACK_DAISY_ALBEDO;
-		else printf("Daisy init function error. Color unknown");
 	}
 
 	void GetDrawColor()
@@ -30,17 +29,17 @@ public:
 		return 11;
 	}
 	bool GetAlive() { return this->alive; }
-private:
-	bool alive;
-	int color; //1 is white, 0 is black
-	float albedo;
-	int age;
-
 	void kill()
 	{
 		this->alive = false;
 		this->color = -1;
-		this->albedo = -1;
 		this->age = -1;
 	}
+	int GetColor() { return this->color; }
+private:
+	bool alive;
+	int color; //1 is white, 0 is black
+	int age;
+
+	
 };

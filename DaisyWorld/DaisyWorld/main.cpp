@@ -1,12 +1,19 @@
 #include "patch.cpp"
 #include <time.h>
+#include <Windows.h>
 #include <array>
 #include <algorithm>
-#include <random>
 patch** world;
 colorSystem cs;
 
 std::array<int, CELL_X_NUM*CELL_Y_NUM> arr;
+
+int world_time = 0;
+float avg_temp;
+float solar_lum;
+float BD_rate;
+float WD_rate;
+float planet_albedo;
 
 void initDaisyGen()
 {
@@ -28,6 +35,37 @@ void randomPlace(float percentage, int color)
 
 }
 
+void initVariable()
+{
+	solar_lum = INIT_SOLAR_LUMINOSITY;
+	planet_albedo = (BD_rate * BLACK_DAISY_ALBEDO + WD_rate * WHITE_DAISY_ALBEDO) / (BD_rate + WD_rate);
+	avg_temp = pow(solar_lum*SOLAR_FLUX_CONSTANT*(1 - planet_albedo) / SB, 0.25) - 273;
+	BD_rate = 0;
+	WD_rate = 0;
+}
+
+void worldUpdate()
+{
+	//updatinv worldwide variable
+	//
+	int Dcolor[2] = { 0,0 };
+	for (int x = 0; x < CELL_X_NUM; x++)
+	{
+		for (int y = 0; y < CELL_Y_NUM; y++)
+		{
+			world[x][y].timePass();//actual time pass is here
+			if (world[x][y].GetDaisyColor() != -1) Dcolor[world[x][y].GetDaisyColor()]++;
+			
+		}
+	}
+
+	solar_lum = INIT_SOLAR_LUMINOSITY + world_time * (1.2 / 200);
+	BD_rate = Dcolor[0] / (float)(CELL_X_NUM*CELL_Y_NUM);
+	WD_rate = Dcolor[1] / (float)(CELL_X_NUM*CELL_Y_NUM);
+	planet_albedo = (BD_rate * BLACK_DAISY_ALBEDO + WD_rate * WHITE_DAISY_ALBEDO) / (BD_rate + WD_rate);
+	avg_temp = pow(solar_lum*SOLAR_FLUX_CONSTANT*(1 - planet_albedo) / SB, 0.25) - 273;
+}
+
 void init()
 {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -37,10 +75,10 @@ void init()
 		world[x] = (patch*)malloc(sizeof(patch)*CELL_Y_NUM);
 		for (int y = 0; y < CELL_Y_NUM; y++)
 		{
-			world[x][y] = patch(BOARD_OFFSET_X + (x+0.5) * CELL_SIZE, BOARD_OFFSET_Y + (y+0.5) * CELL_SIZE, INIT_GLOBAL_TEMP);
+			world[x][y] = patch(BOARD_OFFSET_X + (x+0.5) * CELL_SIZE, BOARD_OFFSET_Y + (y+0.5) * CELL_SIZE);
 		}
 	}
-
+	initVariable();
 	initDaisyGen();
 
 	randomPlace(INIT_WHITE_DAISY_PERCENTAGE, 1);
@@ -75,42 +113,62 @@ void DrawPatch()
 	{
 		for (int y = 0; y < CELL_Y_NUM; y++)
 		{
-			world[x][y].drawDaisy();
-			//world[x][y].drawPatch();
+			//world[x][y].drawDaisy();
+			world[x][y].drawPatch();
 			
 		}
 	}
 }
 
-void display() {
-	glClearColor(0.2, 0.2, 0.2, 1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	//DrawBorder();
+void update()
+{
+	world_time++;
+	worldUpdate();
 	DrawPatch();
+	Sleep(1000);
+}
+void display() {
+	glClearColor(0.5, 0.5, 0.5, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	update();
+	//printf("%d\n", world_time);
 	glutSwapBuffers();
 }
+void TimerFunc(int value)
+{
+	glutPostRedisplay();
+	glutTimerFunc(MAXFPS, TimerFunc, 1);
+}
+void Reshape(int w, int h)
+{
 
+}
+void Mouse(int mouse_event, int state, int x, int y)
+{
 
+}
+void Keyboard(unsigned char key, int x, int y)
+{
 
+}
+void Motion(int x, int y)
+{
+
+}
 int main(int argc, char *argv[])
 {
+	srand(time(NULL));
+	init();
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
 	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 	glutCreateWindow("Daisy World");
-
-	srand(time(NULL));
-
-	init();
-
-	glutDisplayFunc(display);
-	glutMainLoop();
-
-	/*for (int x = 0; x < CELL_X_NUM; x++)
-		
-	free(world);*/
 	
-	return 0;
+	glutDisplayFunc(display);
+	glutReshapeFunc(Reshape);
+	glutMouseFunc(Mouse);
+	glutMotionFunc(Motion);
+	glutKeyboardFunc(Keyboard);
+	glutTimerFunc(MAXFPS, TimerFunc, 1);
+	glutMainLoop();
 }
-
