@@ -64,11 +64,13 @@ void worldUpdate()
 	WD_rate = Dcolor[1] / (float)(CELL_X_NUM*CELL_Y_NUM);
 	planet_albedo = (BD_rate * BLACK_DAISY_ALBEDO + WD_rate * WHITE_DAISY_ALBEDO) / (BD_rate + WD_rate);
 	avg_temp = pow(solar_lum*SOLAR_FLUX_CONSTANT*(1 - planet_albedo) / SB, 0.25) - 273;
+	printf("avg temp: %f\n", avg_temp);
 }
 
 void init()
 {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	initVariable();
 	world = (patch**)malloc(sizeof(patch*)*CELL_X_NUM);
 	for (int x = 0; x < CELL_X_NUM; x++)
 	{
@@ -78,12 +80,12 @@ void init()
 			world[x][y] = patch(BOARD_OFFSET_X + (x+0.5) * CELL_SIZE, BOARD_OFFSET_Y + (y+0.5) * CELL_SIZE);
 		}
 	}
-	initVariable();
+	
 	initDaisyGen();
 
 	randomPlace(INIT_WHITE_DAISY_PERCENTAGE, 1);
 	randomPlace(INIT_BLACK_DAISY_PERCENTAGE, 0);
-
+	
 	cs_init(&cs);
 }
 
@@ -125,7 +127,7 @@ void update()
 	world_time++;
 	worldUpdate();
 	DrawPatch();
-	Sleep(1000);
+	Sleep(100);
 }
 void display() {
 	glClearColor(0.5, 0.5, 0.5, 1);
