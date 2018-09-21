@@ -5,8 +5,10 @@
 #include <algorithm>
 patch** world;
 colorSystem cs;
+int grow[CELL_X_NUM][CELL_Y_NUM];
 
 std::array<int, CELL_X_NUM*CELL_Y_NUM> arr;
+std::array<int, 8> dir;
 
 int world_time = 0;
 float avg_temp;
@@ -19,6 +21,8 @@ void initDaisyGen()
 {
 	for (int x = 0; x < CELL_X_NUM*CELL_Y_NUM; x++) arr[x] = x;
 	shuffle(arr.begin(), arr.end(), std::default_random_engine(rand()));
+	for (int x = 0; x < 8; x++) dir[x] = x;
+	shuffle(dir.begin(), dir.end(), std::default_random_engine(rand()));
 }
 
 void randomPlace(float percentage, int color)
@@ -38,27 +42,78 @@ void randomPlace(float percentage, int color)
 void initVariable()
 {
 	solar_lum = INIT_SOLAR_LUMINOSITY;
+	BD_rate = INIT_BLACK_DAISY_PERCENTAGE;
+	WD_rate = INIT_WHITE_DAISY_PERCENTAGE;
 	planet_albedo = (BD_rate * BLACK_DAISY_ALBEDO + WD_rate * WHITE_DAISY_ALBEDO) / (BD_rate + WD_rate);
 	avg_temp = pow(solar_lum*SOLAR_FLUX_CONSTANT*(1 - planet_albedo) / SB, 0.25) - 273;
-	BD_rate = 0;
-	WD_rate = 0;
+	
+}
+bool spreadGrow(int x, int y,int color)
+{
+	if (x >= 0 && y >= 0 && x < CELL_X_NUM && CELL_Y_NUM && world[x][y].GetDaisyColor() == -1)
+	{
+		world[x][y].AllocDaisy(color);
+		return true;
+	}
+	else return false;
+}
+void dirTrans(int* x, int *y,int dirValue)
+{
+	switch (dirValue)
+	{
+	case 0: *x += -1; *y += -1; break;
+	case 1: *x += -1; *y += 0; break;
+	case 2: *x += -1; *y += 1; break;
+	case 3: *x += 0; *y += -1; break;
+	case 4: *x += 0; *y += 1; break;
+	case 5: *x += 1; *y += -1; break;
+	case 6: *x += 1; *y += 0; break;
+	case 7: *x += 1; *y += 1; break;
+	}
 }
 
+void tryGrow(int x, int y, int color)
+{
+	for (int dirValue = 0; dirValue < 8; dirValue++)
+	{
+		dirTrans(&x, &y, dir[dirValue]);
+		if (spreadGrow(x,y,color))//////////////////work here
+		else dirTrans(&x, &y, dir[7 - dirValue]);
+	}
+}
 void worldUpdate()
 {
 	//updatinv worldwide variable
-	//
+	
 	int Dcolor[2] = { 0,0 };
 	for (int x = 0; x < CELL_X_NUM; x++)
 	{
 		for (int y = 0; y < CELL_Y_NUM; y++)
 		{
-			world[x][y].timePass();//actual time pass is here
-			if (world[x][y].GetDaisyColor() != -1) Dcolor[world[x][y].GetDaisyColor()]++;
-			
+			grow[x][y]=world[x][y].timePass();//actual time pass is here
 		}
 	}
-
+	
+	//get list of locations of new daisy. update them
+	for (int x = 0; x < CELL_X_NUM; x++)
+	{
+		for (int y = 0; y < CELL_Y_NUM; y++)
+		{
+			if (grow[x][y] != -1)
+			{
+				shuffle(dir.begin(), dir.end(), std::default_random_engine(rand()));//shuffle spread dir
+				tryGrow(x, y, grow[x][y]);
+			}
+		}
+	}
+	//
+	for (int x = 0; x < CELL_X_NUM; x++)
+	{
+		for (int y = 0; y < CELL_Y_NUM; y++)
+		{
+			if (world[x][y].GetDaisyColor() != -1) Dcolor[world[x][y].GetDaisyColor()]++;
+		}
+	}
 	solar_lum = INIT_SOLAR_LUMINOSITY + world_time * (1.2 / 200);
 	BD_rate = Dcolor[0] / (float)(CELL_X_NUM*CELL_Y_NUM);
 	WD_rate = Dcolor[1] / (float)(CELL_X_NUM*CELL_Y_NUM);
@@ -66,11 +121,20 @@ void worldUpdate()
 	avg_temp = pow(solar_lum*SOLAR_FLUX_CONSTANT*(1 - planet_albedo) / SB, 0.25) - 273;
 	printf("avg temp: %f\n", avg_temp);
 }
-
+void initGrowArr()
+{
+	for (int x = 0; x < CELL_X_NUM; x++)
+	{
+		for (int y = 0; y < CELL_Y_NUM; y++)
+		{
+			grow[x][y] = -1;
+		}
+	}
+}
 void init()
 {
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	initVariable();
+	initGrowArr();
 	world = (patch**)malloc(sizeof(patch*)*CELL_X_NUM);
 	for (int x = 0; x < CELL_X_NUM; x++)
 	{

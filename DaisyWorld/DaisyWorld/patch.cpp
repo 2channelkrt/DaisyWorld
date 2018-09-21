@@ -8,7 +8,6 @@ extern float solar_lum;
 extern float BD_rate;
 extern float WD_rate;
 extern float planet_albedo;
-
 class patch
 {
 public :
@@ -31,12 +30,10 @@ public :
 		else
 		{
 			this->temperature = pow(solar_lum*SOLAR_FLUX_CONSTANT*0.5 / SB, 0.25) - 273;
-			//printf("%f %f %f\n", solar_lum, solar_lum*SOLAR_FLUX_CONSTANT*0.5, solar_lum*SOLAR_FLUX_CONSTANT*0.5 / SB);
-			//printf("patch temp: %f\n", this->temperature);
 		}
 	}
 	int GetDaisyColor() { return this->daisy.GetColor(); }
-	void timePass()
+	int timePass()
 	{
 		//update daisy status
 		int spread = -1;
@@ -52,8 +49,7 @@ public :
 		{
 			if (this->daisy.GetAlive() == true)
 			{
-				spread = rand() % 8;
-				//grow on another patch
+				spread = this->GetDaisyColor();
 			}
 			else
 			{
@@ -61,7 +57,7 @@ public :
 			}
 		}
 		this->updateTemp();
-		
+		return spread;
 	}
 	void drawPatch()
 	{
@@ -123,6 +119,5 @@ private:
 		norm_rgb(&r, &g, &b);
 		
 		glColor3f(r, g, b);
-		
 	}
 };
