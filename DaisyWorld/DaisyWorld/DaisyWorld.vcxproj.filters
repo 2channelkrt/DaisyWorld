@@ -30,6 +30,9 @@
     <ClCompile Include="color.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="input.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="color.h">

@@ -3,7 +3,9 @@
 #include <Windows.h>
 #include <array>
 #include <algorithm>
+
 patch** world;
+input* inputs;
 colorSystem cs;
 int grow[CELL_X_NUM][CELL_Y_NUM];
 
@@ -15,7 +17,15 @@ float avg_temp;
 float solar_lum;
 float BD_rate;
 float WD_rate;
+float BARREN_rate;
 float planet_albedo;
+
+float INIT_WHITE_DAISY_PERCENTAGE = 0.5;
+float INIT_BLACK_DAISY_PERCENTAGE = 0.5;
+float WHITE_DAISY_ALBEDO = 0.75;
+float BLACK_DAISY_ALBEDO = 0.25;
+float GROUND_ALBEDO = 0.5;
+float DEATH_RATE = 0.3;
 
 void initDaisyGen()
 {
@@ -44,7 +54,8 @@ void initVariable()
 	solar_lum = INIT_SOLAR_LUMINOSITY;
 	BD_rate = INIT_BLACK_DAISY_PERCENTAGE;
 	WD_rate = INIT_WHITE_DAISY_PERCENTAGE;
-	planet_albedo = (BD_rate * BLACK_DAISY_ALBEDO + WD_rate * WHITE_DAISY_ALBEDO) / (BD_rate + WD_rate);
+	BARREN_rate = 1 - (BD_rate + WD_rate);
+	planet_albedo = BD_rate * BLACK_DAISY_ALBEDO + WD_rate * WHITE_DAISY_ALBEDO + BARREN_rate * GROUND_ALBEDO;
 	avg_temp = pow(solar_lum*SOLAR_FLUX_CONSTANT*(1 - planet_albedo) / SB, 0.25) - 273;
 	
 }
@@ -74,15 +85,28 @@ void dirTrans(int* x, int *y,int dirValue)
 
 void tryGrow(int x, int y, int color)
 {
-	for (int dirValue = 0; dirValue < 8; dirValue++)
+	int index = 0;
+	int dirValue = rand() % 8; //randomizing try_spread direction
+	while (index++ < 8)
 	{
 		dirTrans(&x, &y, dir[dirValue]);
-		if (spreadGrow(x,y,color))//////////////////work here
+		if (spreadGrow(x, y, color)) break;
 		else dirTrans(&x, &y, dir[7 - dirValue]);
+		dirValue++;
+		dirValue %= 8;
+	}
+}
+void drawInputSlots()
+{
+	printf("%d %d", sizeof(inputs), sizeof(inputs[0]));
+	for (int i = 0; i < INPUT_NUM; i++)
+	{
+		inputs[i].draw();
 	}
 }
 void worldUpdate()
 {
+	drawInputSlots();
 	//updatinv worldwide variable
 	
 	int Dcolor[2] = { 0,0 };
@@ -101,7 +125,6 @@ void worldUpdate()
 		{
 			if (grow[x][y] != -1)
 			{
-				shuffle(dir.begin(), dir.end(), std::default_random_engine(rand()));//shuffle spread dir
 				tryGrow(x, y, grow[x][y]);
 			}
 		}
@@ -117,9 +140,10 @@ void worldUpdate()
 	solar_lum = INIT_SOLAR_LUMINOSITY + world_time * (1.2 / 200);
 	BD_rate = Dcolor[0] / (float)(CELL_X_NUM*CELL_Y_NUM);
 	WD_rate = Dcolor[1] / (float)(CELL_X_NUM*CELL_Y_NUM);
-	planet_albedo = (BD_rate * BLACK_DAISY_ALBEDO + WD_rate * WHITE_DAISY_ALBEDO) / (BD_rate + WD_rate);
+	BARREN_rate = 1 - (BD_rate + WD_rate);
+	planet_albedo = BD_rate * BLACK_DAISY_ALBEDO + WD_rate * WHITE_DAISY_ALBEDO + BARREN_rate * GROUND_ALBEDO;
 	avg_temp = pow(solar_lum*SOLAR_FLUX_CONSTANT*(1 - planet_albedo) / SB, 0.25) - 273;
-	printf("avg temp: %f\n", avg_temp);
+	printf("planet_albedo: %f avg temp: %f\n",planet_albedo, avg_temp);
 }
 void initGrowArr()
 {
@@ -131,9 +155,21 @@ void initGrowArr()
 		}
 	}
 }
+void initUserInputSlots()
+{
+	inputs = (input*)malloc(sizeof(input)*INPUT_NUM);
+	int i = 0;
+	inputs[i++] = input(&INIT_WHITE_DAISY_PERCENTAGE);
+	inputs[i++] = input(&INIT_BLACK_DAISY_PERCENTAGE);
+	inputs[i++] = input(&WHITE_DAISY_ALBEDO);
+	inputs[i++] = input(&BLACK_DAISY_ALBEDO);
+	inputs[i++] = input(&GROUND_ALBEDO);
+	inputs[i++] = input(&DEATH_RATE);
+}
 void init()
 {
 	initVariable();
+	initUserInputSlots();
 	initGrowArr();
 	world = (patch**)malloc(sizeof(patch*)*CELL_X_NUM);
 	for (int x = 0; x < CELL_X_NUM; x++)
@@ -179,20 +215,26 @@ void DrawPatch()
 	{
 		for (int y = 0; y < CELL_Y_NUM; y++)
 		{
-			//world[x][y].drawDaisy();
-			world[x][y].drawPatch();
+			world[x][y].drawDaisy();
+			//world[x][y].drawPatch();
 			
 		}
 	}
 }
+void ParamEnterAreaUpdate()
+{
 
+}
 void update()
 {
 	world_time++;
+	ParamEnterAreaUpdate();
 	worldUpdate();
 	DrawPatch();
-	Sleep(100);
+	//Sleep(100);
 }
+
+
 void display() {
 	glClearColor(0.5, 0.5, 0.5, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

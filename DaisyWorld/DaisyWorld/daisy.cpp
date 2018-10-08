@@ -1,8 +1,6 @@
-#include <freeglut.h>
 #include <stdio.h>
 #include "color.h"
-#include "base.cpp"
-
+#include "input.cpp"
 
 class Daisy
 {

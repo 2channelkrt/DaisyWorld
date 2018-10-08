@@ -118,6 +118,7 @@
     <ClCompile Include="base.cpp" />
     <ClCompile Include="color.cpp" />
     <ClCompile Include="Daisy.cpp" />
+    <ClCompile Include="input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="patch.cpp" />
   </ItemGroup>

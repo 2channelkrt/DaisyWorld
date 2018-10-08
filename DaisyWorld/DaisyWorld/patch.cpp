@@ -8,6 +8,7 @@ extern float solar_lum;
 extern float BD_rate;
 extern float WD_rate;
 extern float planet_albedo;
+
 class patch
 {
 public :
