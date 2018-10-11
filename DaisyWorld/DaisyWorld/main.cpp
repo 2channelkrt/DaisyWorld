@@ -4,6 +4,8 @@
 #include <array>
 #include <algorithm>
 
+float started;
+
 patch** world;
 input* inputs;
 colorSystem cs;
@@ -12,7 +14,7 @@ int grow[CELL_X_NUM][CELL_Y_NUM];
 std::array<int, CELL_X_NUM*CELL_Y_NUM> arr;
 std::array<int, 8> dir;
 
-int world_time = 0;
+int world_time;
 float avg_temp;
 float solar_lum;
 float BD_rate;
@@ -26,6 +28,7 @@ float WHITE_DAISY_ALBEDO = 0.75;
 float BLACK_DAISY_ALBEDO = 0.25;
 float GROUND_ALBEDO = 0.5;
 float DEATH_RATE = 0.3;
+float INIT_SOLAR_LUMINOSITY = 0.6;
 
 void initDaisyGen()
 {
@@ -98,7 +101,6 @@ void tryGrow(int x, int y, int color)
 }
 void drawInputSlots()
 {
-	printf("%d %d", sizeof(inputs), sizeof(inputs[0]));
 	for (int i = 0; i < INPUT_NUM; i++)
 	{
 		inputs[i].draw();
@@ -106,7 +108,7 @@ void drawInputSlots()
 }
 void worldUpdate()
 {
-	drawInputSlots();
+	
 	//updatinv worldwide variable
 	
 	int Dcolor[2] = { 0,0 };
@@ -159,18 +161,29 @@ void initUserInputSlots()
 {
 	inputs = (input*)malloc(sizeof(input)*INPUT_NUM);
 	int i = 0;
+	inputs[i++] = input(&started);
 	inputs[i++] = input(&INIT_WHITE_DAISY_PERCENTAGE);
 	inputs[i++] = input(&INIT_BLACK_DAISY_PERCENTAGE);
 	inputs[i++] = input(&WHITE_DAISY_ALBEDO);
 	inputs[i++] = input(&BLACK_DAISY_ALBEDO);
 	inputs[i++] = input(&GROUND_ALBEDO);
 	inputs[i++] = input(&DEATH_RATE);
+	inputs[i++] = input(&INIT_SOLAR_LUMINOSITY);
 }
-void init()
+void freeWorld()
 {
-	initVariable();
-	initUserInputSlots();
+	for (int x = 0; x < CELL_X_NUM; x++)
+	{
+		free(world[x]);
+	}
+	free(world);
+}
+
+void initField()
+{
+	world_time = 0;
 	initGrowArr();
+	initVariable();
 	world = (patch**)malloc(sizeof(patch*)*CELL_X_NUM);
 	for (int x = 0; x < CELL_X_NUM; x++)
 	{
@@ -223,14 +236,25 @@ void DrawPatch()
 }
 void ParamEnterAreaUpdate()
 {
-
+	drawInputSlots();
+	for (int i = 0; i < INPUT_NUM; i++)
+	{
+		inputs[i].display();
+		//inputs[i].printValue();
+	}
 }
 void update()
 {
-	world_time++;
+	if (started)
+	{
+		world_time++;
+		worldUpdate();
+		DrawPatch();
+	}
+	
 	ParamEnterAreaUpdate();
-	worldUpdate();
-	DrawPatch();
+	
+	
 	//Sleep(100);
 }
 
@@ -251,9 +275,28 @@ void Reshape(int w, int h)
 {
 
 }
-void Mouse(int mouse_event, int state, int x, int y)
+void Mouse(int key, int state, int x, int y)
 {
+	y = WINDOW_HEIGHT - y;
+	if (started == 0)
+	{
+		if (key == GLUT_LEFT_BUTTON && state == GLUT_DOWN && inputs[0].pressed(x, y))
+		{
+			initField();
+			started = 1;
+		}
+	}
+	else
+	{//simulation already started
+		if (key == GLUT_LEFT_BUTTON && state == GLUT_DOWN && inputs[0].pressed(x, y))
+		{
+			started = 0;
+			freeWorld();
+		}
+	}
 
+	glutPostRedisplay();
+	//if stop is clicked, enable start and all other inputs
 }
 void Keyboard(unsigned char key, int x, int y)
 {
@@ -265,8 +308,9 @@ void Motion(int x, int y)
 }
 int main(int argc, char *argv[])
 {
+	started = 0;
 	srand(time(NULL));
-	init();
+	initUserInputSlots();
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
 	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);

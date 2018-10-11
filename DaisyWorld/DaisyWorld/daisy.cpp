@@ -1,4 +1,4 @@
-#include <stdio.h>
+
 #include "color.h"
 #include "input.cpp"
 

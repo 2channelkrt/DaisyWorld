@@ -19,10 +19,9 @@
 #define SB 0.00000005669
 
 #define MIX_COEFFICIENT 20
-#define INIT_SOLAR_LUMINOSITY 0.6
 #define HEAT_ABSORB_FACTOR 20
 
-#define INPUT_NUM 6
+#define INPUT_NUM 8
 ///////////////////////////////////////////
 extern float INIT_WHITE_DAISY_PERCENTAGE;
 extern float INIT_BLACK_DAISY_PERCENTAGE;
@@ -30,6 +29,7 @@ extern float WHITE_DAISY_ALBEDO;  //reflective portion. between 0~1
 extern float BLACK_DAISY_ALBEDO;
 extern float GROUND_ALBEDO;
 extern float DEATH_RATE;
+extern float INIT_SOLAR_LUMINOSITY;
 
 /////////////////////////////////////above is user-changable////////////////
 #define SOLAR_FLUX_CONSTANT 917
