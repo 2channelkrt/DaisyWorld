@@ -30,6 +30,8 @@ float GROUND_ALBEDO = 0.5;
 float DEATH_RATE = 0.3;
 float INIT_SOLAR_LUMINOSITY = 0.6;
 
+int randomPlaceIndex = 0;
+
 void initDaisyGen()
 {
 	for (int x = 0; x < CELL_X_NUM*CELL_Y_NUM; x++) arr[x] = x;
@@ -40,15 +42,14 @@ void initDaisyGen()
 
 void randomPlace(float percentage, int color)
 {
-	static int index = 0;
 	int x, y;
-	for (int i = index; i < index + CELL_X_NUM*CELL_Y_NUM * percentage; i++)
+	for (int i = randomPlaceIndex; i < randomPlaceIndex + CELL_X_NUM*CELL_Y_NUM * percentage; i++)
 	{
 		x = arr[i] / CELL_X_NUM;
 		y = arr[i] % CELL_X_NUM;
 		world[x][y].AllocDaisy(color);
 	}
-	index = CELL_X_NUM * CELL_Y_NUM * percentage;
+	randomPlaceIndex = CELL_X_NUM * CELL_Y_NUM * percentage;
 
 }
 
@@ -145,7 +146,7 @@ void worldUpdate()
 	BARREN_rate = 1 - (BD_rate + WD_rate);
 	planet_albedo = BD_rate * BLACK_DAISY_ALBEDO + WD_rate * WHITE_DAISY_ALBEDO + BARREN_rate * GROUND_ALBEDO;
 	avg_temp = pow(solar_lum*SOLAR_FLUX_CONSTANT*(1 - planet_albedo) / SB, 0.25) - 273;
-	printf("planet_albedo: %f avg temp: %f\n",planet_albedo, avg_temp);
+	//printf("planet_albedo: %f avg temp: %f\n",planet_albedo, avg_temp);
 }
 void initGrowArr()
 {
@@ -161,14 +162,14 @@ void initUserInputSlots()
 {
 	inputs = (input*)malloc(sizeof(input)*INPUT_NUM);
 	int i = 0;
-	inputs[i++] = input(&started);
-	inputs[i++] = input(&INIT_WHITE_DAISY_PERCENTAGE);
-	inputs[i++] = input(&INIT_BLACK_DAISY_PERCENTAGE);
-	inputs[i++] = input(&WHITE_DAISY_ALBEDO);
-	inputs[i++] = input(&BLACK_DAISY_ALBEDO);
-	inputs[i++] = input(&GROUND_ALBEDO);
-	inputs[i++] = input(&DEATH_RATE);
-	inputs[i++] = input(&INIT_SOLAR_LUMINOSITY);
+	inputs[i++] = input(&started, "start");
+	inputs[i++] = input(&INIT_WHITE_DAISY_PERCENTAGE, "white daisy percentage");
+	inputs[i++] = input(&INIT_BLACK_DAISY_PERCENTAGE, "black daisy percentage");
+	inputs[i++] = input(&WHITE_DAISY_ALBEDO, "white daisy albedo");
+	inputs[i++] = input(&BLACK_DAISY_ALBEDO, "black daisy albedo");
+	inputs[i++] = input(&GROUND_ALBEDO, "ground albedo");
+	inputs[i++] = input(&DEATH_RATE, "death rate");
+	inputs[i++] = input(&INIT_SOLAR_LUMINOSITY, "initial solar luminosity");
 }
 void freeWorld()
 {
@@ -239,7 +240,8 @@ void ParamEnterAreaUpdate()
 	drawInputSlots();
 	for (int i = 0; i < INPUT_NUM; i++)
 	{
-		inputs[i].display();
+		inputs[i].displayName();
+		inputs[i].displayValue();
 		//inputs[i].printValue();
 	}
 }
@@ -260,8 +262,9 @@ void update()
 
 
 void display() {
-	glClearColor(0.5, 0.5, 0.5, 1);
+	glClearColor(0.5, 0.5, 0.5,1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
 	update();
 	//printf("%d\n", world_time);
 	glutSwapBuffers();
@@ -284,6 +287,7 @@ void Mouse(int key, int state, int x, int y)
 		{
 			initField();
 			started = 1;
+			inputs[0].changeName("stop");
 		}
 	}
 	else
@@ -292,6 +296,8 @@ void Mouse(int key, int state, int x, int y)
 		{
 			started = 0;
 			freeWorld();
+			randomPlaceIndex = 0;
+			inputs[0].changeName("start");
 		}
 	}
 
