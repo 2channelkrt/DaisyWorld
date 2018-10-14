@@ -282,12 +282,21 @@ void Mouse(int key, int state, int x, int y)
 {
 	y = WINDOW_HEIGHT - y;
 	if (started == 0)
-	{
+	{//simulation not started
 		if (key == GLUT_LEFT_BUTTON && state == GLUT_DOWN && inputs[0].pressed(x, y))
 		{
 			initField();
+			inputs[0].highlight();
 			started = 1;
 			inputs[0].changeName("stop");
+		}
+		for (int i = 1; i < INPUT_NUM; i++)
+		{
+			if (key == GLUT_LEFT_BUTTON && state == GLUT_DOWN && inputs[i].pressed(x, y))
+			{
+				inputs[i].highlight();
+				break;
+			}
 		}
 	}
 	else
@@ -330,3 +339,6 @@ int main(int argc, char *argv[])
 	glutTimerFunc(MAXFPS, TimerFunc, 1);
 	glutMainLoop();
 }
+
+//defining static memebers of classes
+char input::selected[30] = "null";
