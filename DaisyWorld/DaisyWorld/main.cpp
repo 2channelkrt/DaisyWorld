@@ -31,6 +31,8 @@ float DEATH_RATE = 0.3;
 float INIT_SOLAR_LUMINOSITY = 0.6;
 
 int randomPlaceIndex = 0;
+int highlightedIndex = -1;
+bool keyInputPlaceHolder = false;
 
 void initDaisyGen()
 {
@@ -100,11 +102,18 @@ void tryGrow(int x, int y, int color)
 		dirValue %= 8;
 	}
 }
+void drawInputSlotsMaskted()
+{
+	for (int i = 1; i < INPUT_NUM; i++)
+	{
+		inputs[i].draw(0.8, 0.8, 0.8);
+	}
+}
 void drawInputSlots()
 {
 	for (int i = 0; i < INPUT_NUM; i++)
 	{
-		inputs[i].draw();
+		inputs[i].draw(1,1,1);
 	}
 }
 void worldUpdate()
@@ -271,8 +280,15 @@ void display() {
 }
 void TimerFunc(int value)
 {
-	glutPostRedisplay();
+	
+	if(started) glutPostRedisplay();
 	glutTimerFunc(MAXFPS, TimerFunc, 1);
+}
+void manageKeyStream(int newClick)
+{
+	if (highlightedIndex == newClick) keyInputPlaceHolder = true;
+	else keyInputPlaceHolder = false;
+	highlightedIndex = newClick;
 }
 void Reshape(int w, int h)
 {
@@ -288,14 +304,21 @@ void Mouse(int key, int state, int x, int y)
 			initField();
 			inputs[0].highlight();
 			started = 1;
+			manageKeyStream(0);
 			inputs[0].changeName("stop");
+			
 		}
-		for (int i = 1; i < INPUT_NUM; i++)
+		else
 		{
-			if (key == GLUT_LEFT_BUTTON && state == GLUT_DOWN && inputs[i].pressed(x, y))
+			for (int i = 1; i < INPUT_NUM; i++)
 			{
-				inputs[i].highlight();
-				break;
+				if (key == GLUT_LEFT_BUTTON && state == GLUT_DOWN && inputs[i].pressed(x, y))
+				{
+					inputs[i].highlight();
+					manageKeyStream(i);
+
+					break;
+				}
 			}
 		}
 	}
@@ -306,16 +329,25 @@ void Mouse(int key, int state, int x, int y)
 			started = 0;
 			freeWorld();
 			randomPlaceIndex = 0;
+			manageKeyStream(0);
 			inputs[0].changeName("start");
 		}
 	}
-
 	glutPostRedisplay();
 	//if stop is clicked, enable start and all other inputs
 }
 void Keyboard(unsigned char key, int x, int y)
 {
-
+	printf("current highlight: %d\n", highlightedIndex);
+	if (keyInputPlaceHolder == false)
+	{ //new input
+		printf("new highlighted slot\n");
+		keyInputPlaceHolder = true;
+	}
+	else
+	{//keep stream
+		printf("same slot\n");
+	}
 }
 void Motion(int x, int y)
 {

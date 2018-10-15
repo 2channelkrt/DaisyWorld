@@ -20,9 +20,13 @@ public:
 	{
 		*this->pointer = val;
 	}
+	bool isHighlighted()
+	{
+		return strcmp(this->name, this->selected) == 0;
+	}
 	void drawHighlight()
 	{
-		printf("highlighted %s\n", this->name);
+		//printf("highlighted %s\n", this->name);
 		glLineWidth(3.0f);
 		glBegin(GL_LINE_LOOP);
 		glColor3f(0, 0, 0);
@@ -32,16 +36,16 @@ public:
 		dot((x), (y + INPUT_SLOT_HEIGHT));
 		glEnd();
 	}
-	void draw()
+	void draw(float r,float g,float b)
 	{
 		glBegin(GL_QUADS);
-		glColor3f(1, 1, 1);
+		glColor3f(r,g,b);
 		dot((x), (y));
 		dot((x+INPUT_SLOT_WIDTH), (y));
 		dot((x+INPUT_SLOT_WIDTH), (y+INPUT_SLOT_HEIGHT));
 		dot((x), (y+INPUT_SLOT_HEIGHT));
 		glEnd();
-		if(strcmp(this->name,this->selected)==0)
+		if(this->isHighlighted())
 			this->drawHighlight();
 	}
 	bool isValid()
@@ -86,6 +90,14 @@ public:
 	void highlight()
 	{
 		strcpy_s(this->selected, sizeof(this->selected), this->name);
+	}
+	void setValue(float val)
+	{
+		*this->pointer = val;
+	}
+	float getValue()
+	{
+		return *this->pointer;
 	}
 private:
 	float* pointer;
