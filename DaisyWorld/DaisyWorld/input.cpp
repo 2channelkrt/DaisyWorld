@@ -14,6 +14,7 @@ public:
 		this->y = INPUT_SLOT_INIT_POS_Y + (INPUT_SLOT_HEIGHT+INPUT_SLOT_SPACING) * index++;
 		//printf("%d %d %d\n", index, this->x, this->y);
 		strcpy_s(this->name, sizeof(this->name), name);
+		//strcpy_s(this->name, strlen(this->name), name);
 		//strcpy_s(this->selected, sizeof(this->selected), "null");
 	}
 	void updateValue(float val)
@@ -59,14 +60,18 @@ public:
 	}
 	void displayValue()
 	{
-		glColor3f(0, 0, 0);
-		glRasterPos2d((this->x + INPUT_VALUE_X_OFFSET) * 2 / (float)WINDOW_WIDTH - 1, (this->y + INPUT_VALUE_Y_OFFSET) * 2 / (float)WINDOW_HEIGHT - 1);
-		char buf[10];
-		_gcvt_s(buf, 10, *this->pointer, 5);
-
-		for (int i = 0; i < sizeof(buf); i++)
+		if (strcmp(this->name, "start") != 0 && strcmp(this->name, "stop") != 0)
 		{
-			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, buf[i]);
+			glColor3f(0, 0, 0);
+			glRasterPos2d((this->x + INPUT_VALUE_X_OFFSET) * 2 / (float)WINDOW_WIDTH - 1, (this->y + INPUT_VALUE_Y_OFFSET) * 2 / (float)WINDOW_HEIGHT - 1);
+			char buf[10];
+			//_gcvt_s(buf, 10, *this->pointer, 5);
+			_gcvt(*this->pointer, MAX_DISPLAY_DIGITS, buf);
+
+			for (int i = 0; i < strlen(buf); i++)
+			{
+				glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, buf[i]);
+			}
 		}
 	}
 	void displayName()
@@ -74,7 +79,7 @@ public:
 		glColor3f(1,0,0);
 		glRasterPos2f((this->x + INPUT_SLOT_WIDTH + 10) * 2 / (float)WINDOW_WIDTH - 1, this->y * 2 / (float)(WINDOW_HEIGHT) - 1);
 		
-		for (int i = 0; i < sizeof(this->name); i++)
+		for (int i = 0; i < strlen(this->name); i++)
 		{
 			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, this->name[i]);
 		}

@@ -29,10 +29,13 @@ float BLACK_DAISY_ALBEDO = 0.25;
 float GROUND_ALBEDO = 0.5;
 float DEATH_RATE = 0.3;
 float INIT_SOLAR_LUMINOSITY = 0.6;
+float FRAME_PER_SECOND = 10;
 
 int randomPlaceIndex = 0;
 int highlightedIndex = -1;
 bool keyInputPlaceHolder = false;
+
+std::string buffer;
 
 void initDaisyGen()
 {
@@ -179,6 +182,7 @@ void initUserInputSlots()
 	inputs[i++] = input(&GROUND_ALBEDO, "ground albedo");
 	inputs[i++] = input(&DEATH_RATE, "death rate");
 	inputs[i++] = input(&INIT_SOLAR_LUMINOSITY, "initial solar luminosity");
+	inputs[i++] = input(&FRAME_PER_SECOND, "frame per second");
 }
 void freeWorld()
 {
@@ -282,7 +286,7 @@ void TimerFunc(int value)
 {
 	
 	if(started) glutPostRedisplay();
-	glutTimerFunc(MAXFPS, TimerFunc, 1);
+	glutTimerFunc(1000/(float)FRAME_PER_SECOND, TimerFunc, 1);
 }
 void manageKeyStream(int newClick)
 {
@@ -302,10 +306,10 @@ void Mouse(int key, int state, int x, int y)
 		if (key == GLUT_LEFT_BUTTON && state == GLUT_DOWN && inputs[0].pressed(x, y))
 		{
 			initField();
-			inputs[0].highlight();
 			started = 1;
 			manageKeyStream(0);
 			inputs[0].changeName("stop");
+			inputs[0].highlight();
 			
 		}
 		else
@@ -331,22 +335,41 @@ void Mouse(int key, int state, int x, int y)
 			randomPlaceIndex = 0;
 			manageKeyStream(0);
 			inputs[0].changeName("start");
+			inputs[0].highlight();
 		}
 	}
 	glutPostRedisplay();
 	//if stop is clicked, enable start and all other inputs
 }
+bool validKey(unsigned char key)
+{
+	return key == '.' || ('0' <= key && key <= '9');
+}
 void Keyboard(unsigned char key, int x, int y)
 {
-	printf("current highlight: %d\n", highlightedIndex);
-	if (keyInputPlaceHolder == false)
-	{ //new input
-		printf("new highlighted slot\n");
-		keyInputPlaceHolder = true;
+	if (validKey(key))
+	{
+		printf("current highlight: %d\n", highlightedIndex);
+		if (keyInputPlaceHolder == false)
+		{ //new input
+			printf("new highlighted slot\n");
+			keyInputPlaceHolder = true;
+			buffer = key;
+			inputs[highlightedIndex].setValue(atof(buffer.c_str()));
+			printf("new value: %f\n", inputs[highlightedIndex].getValue());
+		}
+		else
+		{//keep stream
+			printf("same slot\n");
+			buffer += key;
+			inputs[highlightedIndex].setValue(atof(buffer.c_str()));
+			printf("new value: %f\n", inputs[highlightedIndex].getValue());
+		}
+		glutPostRedisplay();
 	}
-	else
-	{//keep stream
-		printf("same slot\n");
+	else if (key == '8')//backspace
+	{
+
 	}
 }
 void Motion(int x, int y)
@@ -368,7 +391,7 @@ int main(int argc, char *argv[])
 	glutMouseFunc(Mouse);
 	glutMotionFunc(Motion);
 	glutKeyboardFunc(Keyboard);
-	glutTimerFunc(MAXFPS, TimerFunc, 1);
+	glutTimerFunc(FRAME_PER_SECOND, TimerFunc, 1);
 	glutMainLoop();
 }
 

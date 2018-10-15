@@ -17,13 +17,14 @@
 #define INPUT_VALUE_X_OFFSET 5
 #define INPUT_VALUE_Y_OFFSET 10
 
+#define MAX_DISPLAY_DIGITS 5
 
 #define SB 0.00000005669
 
 #define MIX_COEFFICIENT 20
 #define HEAT_ABSORB_FACTOR 20
 
-#define INPUT_NUM 8
+#define INPUT_NUM 9
 ///////////////////////////////////////////
 extern float INIT_WHITE_DAISY_PERCENTAGE;
 extern float INIT_BLACK_DAISY_PERCENTAGE;
@@ -32,6 +33,7 @@ extern float BLACK_DAISY_ALBEDO;
 extern float GROUND_ALBEDO;
 extern float DEATH_RATE;
 extern float INIT_SOLAR_LUMINOSITY;
+extern float FRAME_PER_SECOND;
 
 /////////////////////////////////////above is user-changable////////////////
 #define SOLAR_FLUX_CONSTANT 917
