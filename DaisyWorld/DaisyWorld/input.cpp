@@ -1,5 +1,5 @@
 #include "base.cpp"
-#include <freeglut.h>
+#include "GL/freeglut.h"
 #include <stdio.h>
 class input
 {
